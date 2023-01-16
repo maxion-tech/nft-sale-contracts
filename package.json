@@ -1,0 +1,14 @@
+{
+  "name": "nft-sale-contracts",
+  "version": "1.0.0",
+  "description": "NFT Sale Contracts for the NFT Sale",
+  "scripts": {
+    "build": "hardhat compile",
+    "test": "hardhat test"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^1.0.2",
+    "@openzeppelin/contracts-upgradeable": "^4.8.1",
+    "hardhat": "^2.12.6"
+  }
+}
