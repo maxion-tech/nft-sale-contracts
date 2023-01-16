@@ -22,4 +22,6 @@ npx hardhat compile
 npx hardhat test
 ```
 
+##### note: partner sale share percentage is 60% of the total sale price, and the platform sale share percentage is 40% of the total sale price.
+
 ### By Maxion Technologies

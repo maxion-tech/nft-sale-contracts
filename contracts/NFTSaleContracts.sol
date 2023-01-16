@@ -54,9 +54,20 @@ contract NFTSaleContracts is
         uint256 platformShareAmount,
         uint256 partnerShareAmount
     );
+    event WithdrawPlatformSalesShareAmount(
+        address platformWallet,
+        uint256 platformShareAmount
+    );
+    event WithdrawPartnerSalesShareAmount(
+        address partnerWallet,
+        uint256 partnerShareAmount
+    );
 
     // map is store nft id and nft price
     mapping(uint256 => uint256) public nftPrice;
+
+    // map is store nft sold quantity
+    mapping(uint256 => uint256) public nftSoldQuantity;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -333,6 +344,9 @@ contract NFTSaleContracts is
             uint256 partnerShareAmount
         ) = calculateSalesShareAmount(nftTotalPrice);
 
+        // increase nft sold quantity
+        nftSoldQuantity[nftId] += nftQuantity;
+
         emit BuyNft(
             msg.sender,
             nftId,
@@ -361,6 +375,68 @@ contract NFTSaleContracts is
             msg.sender,
             address(this),
             nftTotalPrice
+        );
+    }
+
+    // function to platform can withdraw sales share amount and set sales share amount to zero
+    function withdrawPlatformSalesShareAmount()
+        external
+        onlyRole(PLATFORM_ROLE)
+        nonReentrant
+    {
+        // get platform sales share amount
+        uint256 platformSalesShareAmount = platformSalesShareAmountTotal;
+
+        // require platform sales share amount is not zero
+        require(
+            platformSalesShareAmount != 0,
+            "platform sales share amount is zero"
+        );
+
+        emit WithdrawPlatformSalesShareAmount(
+            msg.sender,
+            platformSalesShareAmount
+        );
+
+        // set platform sales share amount to zero
+        platformSalesShareAmountTotal = 0;
+
+        // transfer platform sales share amount from this contract to platform wallet
+        currencyContract.safeTransferFrom(
+            address(this),
+            msg.sender,
+            platformSalesShareAmount
+        );
+    }
+
+    // function to partner can withdraw sales share amount and set sales share amount to zero
+    function withdrawPartnerSalesShareAmount()
+        external
+        onlyRole(PARTNER_ROLE)
+        nonReentrant
+    {
+        // get partner sales share amount
+        uint256 partnerSalesShareAmount = partnerSalesShareAmountTotal;
+
+        // require partner sales share amount is not zero
+        require(
+            partnerSalesShareAmount != 0,
+            "partner sales share amount is zero"
+        );
+
+        emit WithdrawPartnerSalesShareAmount(
+            msg.sender,
+            partnerSalesShareAmount
+        );
+
+        // set partner sales share amount to zero
+        partnerSalesShareAmountTotal = 0;
+
+        // transfer partner sales share amount from this contract to partner wallet
+        currencyContract.safeTransferFrom(
+            address(this),
+            msg.sender,
+            partnerSalesShareAmount
         );
     }
 
