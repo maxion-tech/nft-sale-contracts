@@ -10,7 +10,7 @@ import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
 /// @custom:security-contact dev@maxion.tech
-contract NFTSaleContracts is
+contract NFTSaleContract is
     Initializable,
     PausableUpgradeable,
     AccessControlUpgradeable,
@@ -31,8 +31,8 @@ contract NFTSaleContracts is
     uint256 public platformSalesSharePercent;
     uint256 public partnerSalesSharePercent;
 
-    uint256 public platformSalesShareAmountTotal = 0;
-    uint256 public partnerSalesShareAmountTotal = 0;
+    uint256 public platformSalesShareAmountTotal;
+    uint256 public partnerSalesShareAmountTotal;
 
     IERC1155Upgradeable public nftContract;
     IERC20Upgradeable public currencyContract;
@@ -129,6 +129,10 @@ contract NFTSaleContracts is
                 100) / DENOMINATOR;
         uint256 partnerSalesSharePercentCalculated = (partnerSalesSharePercent *
             100) / DENOMINATOR;
+
+        // set init share amount total
+        platformSalesShareAmountTotal = 0;
+        partnerSalesShareAmountTotal = 0;
 
         // emit SetSalesSharePercent event
         emit SetSalesSharePercent(
