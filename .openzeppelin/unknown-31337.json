@@ -2,19 +2,59 @@
   "manifestVersion": "3.2",
   "admin": {
     "address": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
-    "txHash": "0x1616341866974de253bb6ecf9a5e2c51eb58bff3a3f5368b0737d7144e173008"
+    "txHash": "0xfec8d5b78822c59f316420f2de995cbb81a9b8d03af8bc0bd8dab43f47d2d90f"
   },
   "proxies": [
     {
+      "address": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+      "txHash": "0xb3a5a17fbbbdf6ae17305e6b41752c8c0596ac9b95e94a16fe36c29d512444b3",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0",
+      "txHash": "0x4b5c34cf1d69357486b95e443ba5e1ec182095387eaf6069687aca57fc0427ff",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x959922bE3CAee4b8Cd9a407cc3ac1C251C2007B1",
+      "txHash": "0x166fa2eb32566bcee46bb534a3c42f66d47dfca4ef4f0e075ef4e27ce3940c62",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xc6e7DF5E7b4f2A278906862b61205850344D4e7d",
+      "txHash": "0xe1e45ea4e70c34eb9659454460d5bae079ae1147d80eefca8ae4c1e9270595c2",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f",
+      "txHash": "0xa18c0a618f1cc9c88e21271bab5be7cb334ff47b832f78d35c793f5e31752964",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xc5a5C42992dECbae36851359345FE25997F5C42d",
+      "txHash": "0x6e9c589173b689e3ae68c1579ef8dfeb11b7ac8ddb2dc50e3e84d331b6aa3ce4",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x84eA74d481Ee0A5332c457a4d796187F6Ba67fEB",
+      "txHash": "0x376c39f723045acc37f4d67c3ba4bd079a02ad721aa3b72b952d6899bd55c1c2",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x851356ae760d987E095750cCeb3bC6014560891C",
+      "txHash": "0x7f41cc04f9545c3e22e70ee5113fa9ea4954356f97db2faf261cb878332f0a45",
+      "kind": "transparent"
+    },
+    {
       "address": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
-      "txHash": "0x9696b826885e2830024872815781b268e99a32ee9c0596de75e8b7671ca515ad",
+      "txHash": "0xedb82a92bbfe4093d509d91335512114387f149db666afdcb5b5624e8d940a08",
       "kind": "transparent"
     }
   ],
   "impls": {
-    "baa572a8cdc459f82ad51d5c3fc922fdd1e3f7d514a00a2a49f8bb89fe9833c1": {
+    "cbdeb84d1934b58b04ac6430b40c4c08c3ec662a42704c3776481196d2e7cdff": {
       "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
-      "txHash": "0x76faa79c52863bf9989e577db6991e90109556e1dc7c0724be7681a188f0da0d",
+      "txHash": "0xd5457ecf9ff9d4c9a37699f64ab142d589541612b5fe2e99a9b64ed1825e5ec4",
       "layout": {
         "solcVersion": "0.8.7",
         "storage": [
@@ -100,68 +140,84 @@
             "src": "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol:80"
           },
           {
-            "label": "platformSalesSharePercent",
+            "label": "__gap",
             "offset": 0,
             "slot": "251",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC1155ReceiverUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/token/ERC1155/utils/ERC1155ReceiverUpgradeable.sol:31"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "301",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC1155HolderUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/token/ERC1155/utils/ERC1155HolderUpgradeable.sol:48"
+          },
+          {
+            "label": "platformSalesSharePercent",
+            "offset": 0,
+            "slot": "351",
             "type": "t_uint256",
             "contract": "NFTSaleContract",
-            "src": "contracts/NFTSaleContract.sol:31"
+            "src": "contracts/NFTSaleContract.sol:33"
           },
           {
             "label": "partnerSalesSharePercent",
             "offset": 0,
-            "slot": "252",
-            "type": "t_uint256",
-            "contract": "NFTSaleContract",
-            "src": "contracts/NFTSaleContract.sol:32"
-          },
-          {
-            "label": "platformSalesShareAmountTotal",
-            "offset": 0,
-            "slot": "253",
+            "slot": "352",
             "type": "t_uint256",
             "contract": "NFTSaleContract",
             "src": "contracts/NFTSaleContract.sol:34"
           },
           {
-            "label": "partnerSalesShareAmountTotal",
+            "label": "platformSalesShareAmountTotal",
             "offset": 0,
-            "slot": "254",
+            "slot": "353",
             "type": "t_uint256",
             "contract": "NFTSaleContract",
-            "src": "contracts/NFTSaleContract.sol:35"
+            "src": "contracts/NFTSaleContract.sol:36"
           },
           {
-            "label": "nftContract",
+            "label": "partnerSalesShareAmountTotal",
             "offset": 0,
-            "slot": "255",
-            "type": "t_contract(IERC1155Upgradeable)899",
+            "slot": "354",
+            "type": "t_uint256",
             "contract": "NFTSaleContract",
             "src": "contracts/NFTSaleContract.sol:37"
           },
           {
+            "label": "nftContract",
+            "offset": 0,
+            "slot": "355",
+            "type": "t_contract(IERC1155Upgradeable)940",
+            "contract": "NFTSaleContract",
+            "src": "contracts/NFTSaleContract.sol:39"
+          },
+          {
             "label": "currencyContract",
             "offset": 0,
-            "slot": "256",
-            "type": "t_contract(IERC20Upgradeable)977",
+            "slot": "356",
+            "type": "t_contract(IERC20Upgradeable)1143",
             "contract": "NFTSaleContract",
-            "src": "contracts/NFTSaleContract.sol:38"
+            "src": "contracts/NFTSaleContract.sol:40"
           },
           {
             "label": "nftPrice",
             "offset": 0,
-            "slot": "257",
+            "slot": "357",
             "type": "t_mapping(t_uint256,t_uint256)",
             "contract": "NFTSaleContract",
-            "src": "contracts/NFTSaleContract.sol:67"
+            "src": "contracts/NFTSaleContract.sol:69"
           },
           {
             "label": "nftSoldQuantity",
             "offset": 0,
-            "slot": "258",
+            "slot": "358",
             "type": "t_mapping(t_uint256,t_uint256)",
             "contract": "NFTSaleContract",
-            "src": "contracts/NFTSaleContract.sol:70"
+            "src": "contracts/NFTSaleContract.sol:72"
           }
         ],
         "types": {
@@ -185,11 +241,11 @@
             "label": "bytes32",
             "numberOfBytes": "32"
           },
-          "t_contract(IERC1155Upgradeable)899": {
+          "t_contract(IERC1155Upgradeable)940": {
             "label": "contract IERC1155Upgradeable",
             "numberOfBytes": "20"
           },
-          "t_contract(IERC20Upgradeable)977": {
+          "t_contract(IERC20Upgradeable)1143": {
             "label": "contract IERC20Upgradeable",
             "numberOfBytes": "20"
           },

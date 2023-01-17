@@ -8,13 +8,15 @@ import "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155Upgradeable.so
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC1155/utils/ERC1155HolderUpgradeable.sol";
 
 /// @custom:security-contact dev@maxion.tech
 contract NFTSaleContract is
     Initializable,
     PausableUpgradeable,
     AccessControlUpgradeable,
-    ReentrancyGuardUpgradeable
+    ReentrancyGuardUpgradeable,
+    ERC1155HolderUpgradeable
 {
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
@@ -89,15 +91,15 @@ contract NFTSaleContract is
         )
     {
         // require admin is not zero address
-        require(admin != address(0), "admin is zero address");
+        require(admin != address(0), "NFTSaleContract: admin is zero address");
 
         // require admin is not deployer
-        require(admin != msg.sender, "admin is deployer");
+        require(admin != msg.sender, "NFTSaleContract: admin is deployer");
 
         // require nft contract address is not zero address
         require(
             nftContractAddress != address(0),
-            "nft contract address is zero address"
+            "NFTSaleContract: nft contract address is zero address"
         );
 
         // require nft contract is valid ERC1155 contract
@@ -105,18 +107,19 @@ contract NFTSaleContract is
             IERC1155Upgradeable(nftContractAddress).supportsInterface(
                 type(IERC1155Upgradeable).interfaceId
             ),
-            "nft contract is not valid ERC1155 contract"
+            "NFTSaleContract: nft contract is not valid ERC1155 contract"
         );
 
         // require currency contract address is not zero address
         require(
             currencyContractAddress != address(0),
-            "currency contract address is zero address"
+            "NFTSaleContract: currency contract address is zero address"
         );
 
         __Pausable_init();
         __AccessControl_init();
         __ReentrancyGuard_init();
+        __ERC1155Holder_init();
 
         // set admin is DEFAULT_ADMIN_ROLE
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
@@ -152,24 +155,30 @@ contract NFTSaleContract is
         uint256 inputPartnerSalesSharePercent
     ) {
         // require platform and partner share percent is not zero
-        require(inputPlatformSalesSharePercent != 0, "platform share is zero");
-        require(inputPartnerSalesSharePercent != 0, "partner share is zero");
+        require(
+            inputPlatformSalesSharePercent != 0,
+            "NFTSaleContract: platform share is zero"
+        );
+        require(
+            inputPartnerSalesSharePercent != 0,
+            "NFTSaleContract: partner share is zero"
+        );
 
         // require platform and partner share percent is not greater than 100%
         require(
             inputPlatformSalesSharePercent <= MAX_SHARE_PERCENT,
-            "platform share is greater than 100%"
+            "NFTSaleContract: platform share is greater than 100%"
         );
         require(
             inputPartnerSalesSharePercent <= MAX_SHARE_PERCENT,
-            "partner share is greater than 100%"
+            "NFTSaleContract: partner share is greater than 100%"
         );
 
         // require platform and partner share percent is not greater than 100%
         require(
             inputPlatformSalesSharePercent + inputPartnerSalesSharePercent ==
                 MAX_SHARE_PERCENT,
-            "platform and partner share is not equal to 100%"
+            "NFTSaleContract: platform and partner share is not equal to 100%"
         );
         _;
     }
@@ -180,7 +189,7 @@ contract NFTSaleContract is
         returns (uint256 platformShareAmount, uint256 partnerShareAmount)
     {
         // require amount is not zero
-        require(amount != 0, "amount is zero");
+        require(amount != 0, "NFTSaleContract: amount is zero");
 
         // calculate platform and partner share amount
         platformShareAmount =
@@ -223,22 +232,22 @@ contract NFTSaleContract is
         uint256 price
     ) external onlyRole(NFT_SELLER_ROLE) {
         // require nft quantity is not zero
-        require(nftQuantity != 0, "nft quantity is zero");
+        require(nftQuantity != 0, "NFTSaleContract: nft quantity is zero");
 
         // require nft price is not zero
-        require(price != 0, "nft price is zero");
+        require(price != 0, "NFTSaleContract: nft price is zero");
 
         // require nft balance in seller wallet is greater or equal to nft quantity
         require(
             nftContract.balanceOf(msg.sender, nftId) >= nftQuantity,
-            "nft balance is less than nft quantity"
+            "NFTSaleContract: nft balance is less than nft quantity"
         );
 
         // require nft id is not zero
-        require(nftId != 0, "nft id is zero");
+        require(nftId != 0, "NFTSaleContract: nft id is zero");
 
         // require nft id is not exist
-        require(nftPrice[nftId] == 0, "nft id is exist");
+        require(nftPrice[nftId] == 0, "NFTSaleContract: nft id is exist");
 
         emit SetNftToSale(nftId, nftQuantity, price);
 
@@ -261,16 +270,16 @@ contract NFTSaleContract is
         onlyRole(NFT_SELLER_ROLE)
     {
         // require nft id is not zero
-        require(nftId != 0, "nft id is zero");
+        require(nftId != 0, "NFTSaleContract: nft id is zero");
 
         // require nft id is exist
-        require(nftPrice[nftId] != 0, "nft id is not exist");
+        require(nftPrice[nftId] != 0, "NFTSaleContract: nft id is not exist");
 
         // get nft amount in this contract
         uint256 nftAmount = nftContract.balanceOf(address(this), nftId);
 
         // require nft amount is not zero
-        require(nftAmount != 0, "nft amount is zero");
+        require(nftAmount != 0, "NFTSaleContract: nft amount is zero");
 
         emit RemoveNftFromSale(nftId, nftAmount);
 
@@ -293,16 +302,19 @@ contract NFTSaleContract is
         onlyRole(NFT_SELLER_ROLE)
     {
         // require nft id is not zero
-        require(nftId != 0, "nft id is zero");
+        require(nftId != 0, "NFTSaleContract: nft id is zero");
 
         // require nft id is exist
-        require(nftPrice[nftId] != 0, "nft id is not exist");
+        require(nftPrice[nftId] != 0, "NFTSaleContract: nft id is not exist");
 
         // require nft price is not zero
-        require(price != 0, "nft price is zero");
+        require(price != 0, "NFTSaleContract: nft price is zero");
 
         // require nft price is not greater than 1000 ether
-        require(price <= 1000 ether, "nft price is greater than 1000 ether");
+        require(
+            price <= 1000 ether,
+            "NFTSaleContract: nft price is greater than 1000 ether"
+        );
 
         // set nft price
         nftPrice[nftId] = price;
@@ -317,18 +329,18 @@ contract NFTSaleContract is
         nonReentrant
     {
         // require nft quantity is not zero
-        require(nftQuantity != 0, "nft quantity is zero");
+        require(nftQuantity != 0, "NFTSaleContract: nft quantity is zero");
 
         // require nft id is not zero
-        require(nftId != 0, "nft id is zero");
+        require(nftId != 0, "NFTSaleContract: nft id is zero");
 
         // require nft id is exist
-        require(nftPrice[nftId] != 0, "nft id is not exist");
+        require(nftPrice[nftId] != 0, "NFTSaleContract: nft id is not exist");
 
         // require nft amount in this contract is greater or equal to nft quantity
         require(
             nftContract.balanceOf(address(this), nftId) >= nftQuantity,
-            "nft amount is less than nft quantity"
+            "NFTSaleContract: nft amount is less than nft quantity"
         );
 
         // get nft price
@@ -339,7 +351,7 @@ contract NFTSaleContract is
         // require user have enough currency token to buy nft
         require(
             currencyContract.balanceOf(msg.sender) >= nftTotalPrice,
-            "user have not enough currency token to buy nft"
+            "NFTSaleContract: user have not enough currency token to buy nft"
         );
 
         // calculate sales share amount
@@ -374,6 +386,8 @@ contract NFTSaleContract is
             ""
         );
 
+        // approve currency token to this contract
+
         // transfer currency token from user wallet to this contract
         currencyContract.safeTransferFrom(
             msg.sender,
@@ -394,7 +408,7 @@ contract NFTSaleContract is
         // require platform sales share amount is not zero
         require(
             platformSalesShareAmount != 0,
-            "platform sales share amount is zero"
+            "NFTSaleContract: platform sales share amount is zero"
         );
 
         emit WithdrawPlatformSalesShareAmount(
@@ -406,6 +420,11 @@ contract NFTSaleContract is
         platformSalesShareAmountTotal = 0;
 
         // transfer platform sales share amount from this contract to platform wallet
+
+        // approve before transfer
+        currencyContract.safeApprove(address(this), platformSalesShareAmount);
+
+        // transfer
         currencyContract.safeTransferFrom(
             address(this),
             msg.sender,
@@ -425,7 +444,7 @@ contract NFTSaleContract is
         // require partner sales share amount is not zero
         require(
             partnerSalesShareAmount != 0,
-            "partner sales share amount is zero"
+            "NFTSaleContract: partner sales share amount is zero"
         );
 
         emit WithdrawPartnerSalesShareAmount(
@@ -435,6 +454,9 @@ contract NFTSaleContract is
 
         // set partner sales share amount to zero
         partnerSalesShareAmountTotal = 0;
+
+        // approve before transfer
+        currencyContract.safeApprove(address(this), partnerSalesShareAmount);
 
         // transfer partner sales share amount from this contract to partner wallet
         currencyContract.safeTransferFrom(
@@ -450,5 +472,16 @@ contract NFTSaleContract is
 
     function unpause() external onlyRole(PAUSER_ROLE) {
         _unpause();
+    }
+
+    // supports interfaces overdrive
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        virtual
+        override(AccessControlUpgradeable, ERC1155ReceiverUpgradeable)
+        returns (bool)
+    {
+        return super.supportsInterface(interfaceId);
     }
 }
