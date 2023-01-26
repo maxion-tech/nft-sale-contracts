@@ -4,7 +4,8 @@
   "description": "NFT Sale Contracts for the NFT Sale",
   "scripts": {
     "build": "hardhat compile",
-    "test": "hardhat test"
+    "test": "hardhat test",
+    "deploy:nft-sale-contract:bsc-testnet": "source .env && hardhat run scripts/deploy.ts --network bscTestnet"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^1.0.2",

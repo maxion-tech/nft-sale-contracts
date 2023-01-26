@@ -1,18 +1,24 @@
-import { ethers } from "hardhat";
+import hre, { ethers, upgrades } from "hardhat";
+import { NFTSaleContract } from "../typechain-types";
 
 async function main() {
-  const currentTimestampInSeconds = Math.round(Date.now() / 1000);
-  const ONE_YEAR_IN_SECS = 365 * 24 * 60 * 60;
-  const unlockTime = currentTimestampInSeconds + ONE_YEAR_IN_SECS;
+  const NFTSaleContractFactory = await ethers.getContractFactory("NFTSaleContract");
+  const { ADMIN_ADDRESS, NFT_ADDRESS, CURRENCY_CONTRACT_ADDRESS } = process.env;
+  // check if admin address is set
+  if (!ADMIN_ADDRESS) throw new Error("ADMIN_ADDRESS is not set");
+  // check if nft address is set
+  if (!NFT_ADDRESS) throw new Error("NFT_ADDRESS is not set");
+  // check if currency contract address is set
+  if (!CURRENCY_CONTRACT_ADDRESS) throw new Error("CURRENCY_CONTRACT_ADDRESS is not set");
 
-  const lockedAmount = ethers.utils.parseEther("1");
+  const PLATFORM_SALES_SHARE_PERCENT = 40 * 10 ** 8;
+  const PARTNER_SALES_SHARE_PERCENT = 60 * 10 ** 8;
 
-  const Lock = await ethers.getContractFactory("Lock");
-  const lock = await Lock.deploy(unlockTime, { value: lockedAmount });
+  const nftSaleContract = await upgrades.deployProxy(NFTSaleContractFactory, [ADMIN_ADDRESS, PLATFORM_SALES_SHARE_PERCENT, PARTNER_SALES_SHARE_PERCENT, NFT_ADDRESS, CURRENCY_CONTRACT_ADDRESS]) as NFTSaleContract;
+  await nftSaleContract.deployed();
 
-  await lock.deployed();
-
-  console.log(`Lock with 1 ETH and unlock timestamp ${unlockTime} deployed to ${lock.address}`);
+  console.log("NFTSaleContract deployed to:", nftSaleContract.address);
+  console.log(`You can verify contract by running: npx hardhat verify --network ${hre.network.name} ${nftSaleContract.address}`);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
