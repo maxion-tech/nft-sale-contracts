@@ -5,13 +5,16 @@
   "scripts": {
     "build": "hardhat compile",
     "test": "hardhat test",
-    "deploy:nft-sale-contract:bsc-testnet": "source .env && hardhat run scripts/deploy.ts --network bscTestnet"
+    "deploy:nft-sale-contract:bsc-testnet": "source .env && hardhat run scripts/deploy.ts --network bscTestnet",
+    "deploy:nft-sale-contract:bsc-testnet:hw": "source .env.cbt && hardhat run scripts/deploy_hw.ts --network bscTestnet"
   },
   "devDependencies": {
+    "@ethersproject/hardware-wallets": "^5.7.0",
+    "@ledgerhq/hw-transport-node-hid": "^6.27.17",
     "@nomicfoundation/hardhat-toolbox": "^1.0.2",
     "@openzeppelin/contracts": "^4.8.1",
     "@openzeppelin/contracts-upgradeable": "^4.8.1",
-    "@openzeppelin/hardhat-upgrades": "^1.22.0",
+    "@openzeppelin/hardhat-upgrades": "^1.28.0",
     "hardhat": "^2.12.6"
   }
 }
