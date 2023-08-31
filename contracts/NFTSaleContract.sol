@@ -1,24 +1,23 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.7;
 
-import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC1155/utils/ERC1155HolderUpgradeable.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
 
 /// @custom:security-contact dev@maxion.tech
 contract NFTSaleContract is
-    Initializable,
-    PausableUpgradeable,
-    AccessControlUpgradeable,
-    ReentrancyGuardUpgradeable,
-    ERC1155HolderUpgradeable
+    Pausable,
+    AccessControl,
+    ReentrancyGuard,
+    ERC1155Holder
 {
-    using SafeERC20Upgradeable for IERC20Upgradeable;
+    using SafeERC20 for IERC20;
 
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     bytes32 public constant PARAMETER_SETTER_ROLE =
@@ -27,8 +26,8 @@ contract NFTSaleContract is
     bytes32 public constant PLATFORM_ROLE = keccak256("PLATFORM_ROLE"); // for withdraw share amount to platform wallet
     bytes32 public constant PARTNER_ROLE = keccak256("PARTNER_ROLE"); // for withdraw share amount to partner wallet
 
-    uint256 public constant DENOMINATOR = 10**10;
-    uint256 public constant MAX_SHARE_PERCENT = 100 * 10**8;
+    uint256 public constant DENOMINATOR = 10 ** 10;
+    uint256 public constant MAX_SHARE_PERCENT = 100 * 10 ** 8;
 
     uint256 public platformSalesSharePercent;
     uint256 public partnerSalesSharePercent;
@@ -36,8 +35,8 @@ contract NFTSaleContract is
     uint256 public platformSalesShareAmountTotal;
     uint256 public partnerSalesShareAmountTotal;
 
-    IERC1155Upgradeable public nftContract;
-    IERC20Upgradeable public currencyContract;
+    IERC1155 public nftContract;
+    IERC20 public currencyContract;
 
     event SetSalesSharePercent(
         uint256 platformSalesSharePercent,
@@ -71,20 +70,13 @@ contract NFTSaleContract is
     // map is store nft sold quantity
     mapping(uint256 => uint256) public nftSoldQuantity;
 
-    /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor() {
-        _disableInitializers();
-    }
-
-    function initialize(
+    constructor(
         address admin,
         uint256 initPlatformSalesSharePercent,
         uint256 initPartnerSalesSharePercent,
         address nftContractAddress,
         address currencyContractAddress
     )
-        external
-        initializer
         isValidSalesSharePercent(
             initPlatformSalesSharePercent,
             initPartnerSalesSharePercent
@@ -104,8 +96,8 @@ contract NFTSaleContract is
 
         // require nft contract is valid ERC1155 contract
         require(
-            IERC1155Upgradeable(nftContractAddress).supportsInterface(
-                type(IERC1155Upgradeable).interfaceId
+            IERC1155(nftContractAddress).supportsInterface(
+                type(IERC1155).interfaceId
             ),
             "NFTSaleContract: nft contract is not valid ERC1155 contract"
         );
@@ -115,11 +107,6 @@ contract NFTSaleContract is
             currencyContractAddress != address(0),
             "NFTSaleContract: currency contract address is zero address"
         );
-
-        __Pausable_init();
-        __AccessControl_init();
-        __ReentrancyGuard_init();
-        __ERC1155Holder_init();
 
         // set admin is DEFAULT_ADMIN_ROLE
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
@@ -144,10 +131,10 @@ contract NFTSaleContract is
         );
 
         // set nft contract
-        nftContract = IERC1155Upgradeable(nftContractAddress);
+        nftContract = IERC1155(nftContractAddress);
 
         // set currency contract
-        currencyContract = IERC20Upgradeable(currencyContractAddress);
+        currencyContract = IERC20(currencyContractAddress);
     }
 
     modifier isValidSalesSharePercent(
@@ -183,7 +170,9 @@ contract NFTSaleContract is
         _;
     }
 
-    function calculateSalesShareAmount(uint256 amount)
+    function calculateSalesShareAmount(
+        uint256 amount
+    )
         public
         view
         returns (uint256 platformShareAmount, uint256 partnerShareAmount)
@@ -265,10 +254,9 @@ contract NFTSaleContract is
     }
 
     // function to transfer all nft from this contract back to seller wallet and remove nft price
-    function removeNftFromSale(uint256 nftId)
-        external
-        onlyRole(NFT_SELLER_ROLE)
-    {
+    function removeNftFromSale(
+        uint256 nftId
+    ) external onlyRole(NFT_SELLER_ROLE) {
         // require nft id is not zero
         require(nftId != 0, "NFTSaleContract: nft id is zero");
 
@@ -297,10 +285,10 @@ contract NFTSaleContract is
     }
 
     // function to set nft price
-    function setNftPrice(uint256 nftId, uint256 price)
-        external
-        onlyRole(NFT_SELLER_ROLE)
-    {
+    function setNftPrice(
+        uint256 nftId,
+        uint256 price
+    ) external onlyRole(NFT_SELLER_ROLE) {
         // require nft id is not zero
         require(nftId != 0, "NFTSaleContract: nft id is zero");
 
@@ -309,7 +297,7 @@ contract NFTSaleContract is
 
         // require nft price is not zero
         require(price != 0, "NFTSaleContract: nft price is zero");
-        
+
         // set nft price
         nftPrice[nftId] = price;
 
@@ -317,11 +305,10 @@ contract NFTSaleContract is
     }
 
     // function to user can buy nft with currency token and transfer nft to user wallet and canculate sales share amount and increase sales share amount of platform and partner to withdraw later
-    function buyNft(uint256 nftId, uint256 nftQuantity)
-        external
-        whenNotPaused
-        nonReentrant
-    {
+    function buyNft(
+        uint256 nftId,
+        uint256 nftQuantity
+    ) external whenNotPaused nonReentrant {
         // require nft quantity is not zero
         require(nftQuantity != 0, "NFTSaleContract: nft quantity is zero");
 
@@ -423,7 +410,10 @@ contract NFTSaleContract is
 
         // approve before transfer
         // check is allowance have enough
-        if(currencyContract.allowance(address(this), msg.sender) < platformSalesShareAmount) {
+        if (
+            currencyContract.allowance(address(this), msg.sender) <
+            platformSalesShareAmount
+        ) {
             currencyContract.safeApprove(address(this), 0);
         }
 
@@ -458,7 +448,10 @@ contract NFTSaleContract is
         // approve before transfer
 
         // check is allowance have enough
-        if(currencyContract.allowance(address(this), msg.sender) < partnerSalesShareAmount) {
+        if (
+            currencyContract.allowance(address(this), msg.sender) <
+            partnerSalesShareAmount
+        ) {
             currencyContract.safeApprove(address(this), 0);
         }
 
@@ -477,11 +470,13 @@ contract NFTSaleContract is
     }
 
     // supports interfaces overdrive
-    function supportsInterface(bytes4 interfaceId)
+    function supportsInterface(
+        bytes4 interfaceId
+    )
         public
         view
         virtual
-        override(AccessControlUpgradeable, ERC1155ReceiverUpgradeable)
+        override(AccessControl, ERC1155Receiver)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);

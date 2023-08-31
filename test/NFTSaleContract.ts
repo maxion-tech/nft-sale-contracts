@@ -2,7 +2,6 @@ import { time, loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { anyValue } from "@nomicfoundation/hardhat-chai-matchers/withArgs";
 import { expect } from "chai";
 import { ethers, upgrades } from "hardhat";
-import { NFTSaleContract } from "../typechain-types";
 
 describe("NFT Sale Contract", function () {
   // We define a fixture to reuse the same setup in every test.
@@ -22,7 +21,7 @@ describe("NFT Sale Contract", function () {
     const currencyContract = await CurrencyContractFactory.deploy();
 
     const NFTSaleContractFactory = await ethers.getContractFactory("NFTSaleContract");
-    const nftSaleContract = await upgrades.deployProxy(NFTSaleContractFactory, [admin.address, PLATFORM_SALES_SHARE_PERCENT, PARTNER_SALES_SHARE_PERCENT, nft.address, currencyContract.address]) as NFTSaleContract;
+    const nftSaleContract = await NFTSaleContractFactory.deploy(admin.address, PLATFORM_SALES_SHARE_PERCENT, PARTNER_SALES_SHARE_PERCENT, nft.address, currencyContract.address);
 
     const DEFAULT_ADMIN_ROLE = await nftSaleContract.DEFAULT_ADMIN_ROLE();
     const NFT_SELLER_ROLE = await nftSaleContract.NFT_SELLER_ROLE();
@@ -58,56 +57,56 @@ describe("NFT Sale Contract", function () {
       const { nft, currencyContract, admin } = await loadFixture(deployFixture);
 
       const NFTSaleContractFactory = await ethers.getContractFactory("NFTSaleContract");
-      await expect(upgrades.deployProxy(NFTSaleContractFactory, [admin.address, 50 * 10 ** 8, 51 * 10 ** 8, nft.address, currencyContract.address])).to.be.revertedWith("NFTSaleContract: platform and partner share is not equal to 100%");
+      await expect(NFTSaleContractFactory.deploy(admin.address, 50 * 10 ** 8, 51 * 10 ** 8, nft.address, currencyContract.address)).to.be.revertedWith("NFTSaleContract: platform and partner share is not equal to 100%");
     });
 
     it("Should revert if platformSalesSharePercent + partnerSalesSharePercent < 100%", async function () {
       const { nft, currencyContract, admin } = await loadFixture(deployFixture);
 
       const NFTSaleContractFactory = await ethers.getContractFactory("NFTSaleContract");
-      await expect(upgrades.deployProxy(NFTSaleContractFactory, [admin.address, 50 * 10 ** 8, 49 * 10 ** 8, nft.address, currencyContract.address])).to.be.revertedWith("NFTSaleContract: platform and partner share is not equal to 100%");
+      await expect(NFTSaleContractFactory.deploy(admin.address, 50 * 10 ** 8, 49 * 10 ** 8, nft.address, currencyContract.address)).to.be.revertedWith("NFTSaleContract: platform and partner share is not equal to 100%");
     });
 
     it("Should revert if platformSalesSharePercent + partnerSalesSharePercent = 0%", async function () {
       const { nft, currencyContract, admin } = await loadFixture(deployFixture);
 
       const NFTSaleContractFactory = await ethers.getContractFactory("NFTSaleContract");
-      await expect(upgrades.deployProxy(NFTSaleContractFactory, [admin.address, 0, 0, nft.address, currencyContract.address])).to.be.revertedWith("NFTSaleContract: platform share is zero");
+      await expect(NFTSaleContractFactory.deploy(admin.address, 0, 0, nft.address, currencyContract.address)).to.be.revertedWith("NFTSaleContract: platform share is zero");
     });
 
     it("Should revert if platformSalesSharePercent = 0%", async function () {
       const { nft, currencyContract, admin } = await loadFixture(deployFixture);
 
       const NFTSaleContractFactory = await ethers.getContractFactory("NFTSaleContract");
-      await expect(upgrades.deployProxy(NFTSaleContractFactory, [admin.address, 0, 50 * 10 ** 8, nft.address, currencyContract.address])).to.be.revertedWith("NFTSaleContract: platform share is zero");
+      await expect(NFTSaleContractFactory.deploy(admin.address, 0, 50 * 10 ** 8, nft.address, currencyContract.address)).to.be.revertedWith("NFTSaleContract: platform share is zero");
     });
 
     it("Should revert if partnerSalesSharePercent = 0%", async function () {
       const { nft, currencyContract, admin } = await loadFixture(deployFixture);
 
       const NFTSaleContractFactory = await ethers.getContractFactory("NFTSaleContract");
-      await expect(upgrades.deployProxy(NFTSaleContractFactory, [admin.address, 50 * 10 ** 8, 0, nft.address, currencyContract.address])).to.be.revertedWith("NFTSaleContract: partner share is zero");
+      await expect(NFTSaleContractFactory.deploy(admin.address, 50 * 10 ** 8, 0, nft.address, currencyContract.address)).to.be.revertedWith("NFTSaleContract: partner share is zero");
     });
 
     it("Should revert if nftContract is zero address", async function () {
       const { currencyContract, admin } = await loadFixture(deployFixture);
 
       const NFTSaleContractFactory = await ethers.getContractFactory("NFTSaleContract");
-      await expect(upgrades.deployProxy(NFTSaleContractFactory, [admin.address, 50 * 10 ** 8, 50 * 10 ** 8, ethers.constants.AddressZero, currencyContract.address])).to.be.revertedWith("NFTSaleContract: nft contract address is zero address");
+      await expect(NFTSaleContractFactory.deploy(admin.address, 50 * 10 ** 8, 50 * 10 ** 8, ethers.constants.AddressZero, currencyContract.address)).to.be.revertedWith("NFTSaleContract: nft contract address is zero address");
     });
 
     it("Should revert if currencyContract is zero address", async function () {
       const { nft, admin } = await loadFixture(deployFixture);
 
       const NFTSaleContractFactory = await ethers.getContractFactory("NFTSaleContract");
-      await expect(upgrades.deployProxy(NFTSaleContractFactory, [admin.address, 50 * 10 ** 8, 50 * 10 ** 8, nft.address, ethers.constants.AddressZero])).to.be.revertedWith("NFTSaleContract: currency contract address is zero address");
+      await expect(NFTSaleContractFactory.deploy(admin.address, 50 * 10 ** 8, 50 * 10 ** 8, nft.address, ethers.constants.AddressZero)).to.be.revertedWith("NFTSaleContract: currency contract address is zero address");
     });
 
     it("Should revert if admin is zero address", async function () {
       const { nft, currencyContract } = await loadFixture(deployFixture);
 
       const NFTSaleContractFactory = await ethers.getContractFactory("NFTSaleContract");
-      await expect(upgrades.deployProxy(NFTSaleContractFactory, [ethers.constants.AddressZero, 50 * 10 ** 8, 50 * 10 ** 8, nft.address, currencyContract.address])).to.be.revertedWith("NFTSaleContract: admin is zero address");
+      await expect(NFTSaleContractFactory.deploy(ethers.constants.AddressZero, 50 * 10 ** 8, 50 * 10 ** 8, nft.address, currencyContract.address)).to.be.revertedWith("NFTSaleContract: admin is zero address");
     });
 
   });
