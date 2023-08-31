@@ -386,6 +386,14 @@ contract NFTSaleContract is
             address(this),
             nftTotalPrice
         );
+
+        // if soldout then remove nft price
+        if (
+            nftContract.balanceOf(address(this), nftId) == 0 &&
+            nftSoldQuantity[nftId] != 0
+        ) {
+            delete nftPrice[nftId];
+        }
     }
 
     // function to platform can withdraw sales share amount and set sales share amount to zero

@@ -225,7 +225,7 @@ describe("NFT Sale Contract", function () {
       const quantity = 1;
       const price = ethers.utils.parseEther("100");
 
-      await nft.mint(seller.address, nftId, 1, "0x00");
+      await nft.mint(seller.address, nftId, quantity, "0x00");
       await nft.connect(seller).setApprovalForAll(nftSaleContract.address, true);
 
       // seller set nft to sale
@@ -235,7 +235,7 @@ describe("NFT Sale Contract", function () {
       await currencyContract.mint(buyer.address, price);
       await currencyContract.connect(buyer).approve(nftSaleContract.address, price);
 
-      await expect(nftSaleContract.connect(buyer).buyNft(nftId, quantity + 1)).to.be.revertedWith("NFTSaleContract: nft amount is less than nft quantity");
+      await expect(nftSaleContract.connect(buyer).buyNft(nftId, 2)).to.be.revertedWith("NFTSaleContract: nft amount is less than nft quantity");
     });
 
     it("Should revert if NFT is not on sale", async function () {
@@ -274,7 +274,7 @@ describe("NFT Sale Contract", function () {
 
       await nftSaleContract.connect(buyer).buyNft(nftId, quantity);
 
-      await expect(nftSaleContract.connect(buyer).buyNft(nftId, quantity)).to.be.revertedWith("NFTSaleContract: nft amount is less than nft quantity");
+      await expect(nftSaleContract.connect(buyer).buyNft(nftId, quantity)).to.be.revertedWith("NFTSaleContract: nft id is not exist");
     });
 
     it("Should revert if currency is not enough", async function () {
