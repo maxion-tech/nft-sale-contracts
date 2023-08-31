@@ -425,11 +425,7 @@ contract NFTSaleContract is
         currencyContract.safeApprove(address(this), platformSalesShareAmount);
 
         // transfer
-        currencyContract.safeTransferFrom(
-            address(this),
-            msg.sender,
-            platformSalesShareAmount
-        );
+        currencyContract.safeTransfer(msg.sender, platformSalesShareAmount);
     }
 
     // function to partner can withdraw sales share amount and set sales share amount to zero
