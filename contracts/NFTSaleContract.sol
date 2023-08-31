@@ -414,6 +414,11 @@ contract NFTSaleContract is
         // transfer platform sales share amount from this contract to platform wallet
 
         // approve before transfer
+        // check is allowance have enough
+        if(currencyContract.allowance(address(this), msg.sender) < platformSalesShareAmount) {
+            currencyContract.safeApprove(address(this), 0);
+        }
+
         currencyContract.safeApprove(address(this), platformSalesShareAmount);
 
         // transfer
@@ -442,16 +447,17 @@ contract NFTSaleContract is
 
         // set partner sales share amount to zero
         partnerSalesShareAmountTotal = 0;
-
         // approve before transfer
+
+        // check is allowance have enough
+        if(currencyContract.allowance(address(this), msg.sender) < partnerSalesShareAmount) {
+            currencyContract.safeApprove(address(this), 0);
+        }
+
         currencyContract.safeApprove(address(this), partnerSalesShareAmount);
 
         // transfer partner sales share amount from this contract to partner wallet
-        currencyContract.safeTransferFrom(
-            address(this),
-            msg.sender,
-            partnerSalesShareAmount
-        );
+        currencyContract.safeTransfer(msg.sender, partnerSalesShareAmount);
     }
 
     function pause() external onlyRole(PAUSER_ROLE) {
