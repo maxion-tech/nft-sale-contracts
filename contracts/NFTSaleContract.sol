@@ -309,13 +309,7 @@ contract NFTSaleContract is
 
         // require nft price is not zero
         require(price != 0, "NFTSaleContract: nft price is zero");
-
-        // require nft price is not greater than 1000 ether
-        require(
-            price <= 1000 ether,
-            "NFTSaleContract: nft price is greater than 1000 ether"
-        );
-
+        
         // set nft price
         nftPrice[nftId] = price;
 
@@ -385,8 +379,6 @@ contract NFTSaleContract is
             nftQuantity,
             ""
         );
-
-        // approve currency token to this contract
 
         // transfer currency token from user wallet to this contract
         currencyContract.safeTransferFrom(
