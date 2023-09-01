@@ -184,7 +184,7 @@ contract NFTSaleContract is
         platformShareAmount =
             (amount * platformSalesSharePercent) /
             DENOMINATOR;
-        partnerShareAmount = (amount * partnerSalesSharePercent) / DENOMINATOR;
+        partnerShareAmount = amount - platformShareAmount;
     }
 
     function setSalesShareAmountPercent(
