@@ -335,14 +335,26 @@ contract NFTSaleContract is
             "NFTSaleContract: user have not enough currency token to buy nft"
         );
 
-        // calculate sales share amount
+        // increase nft sold quantity
+        nftSoldQuantity[nftId] += nftQuantity;
+
+        uint256 initialBalance = currencyContract.balanceOf(address(this));
+
+        // transfer currency token from user wallet to this contract
+        currencyContract.safeTransferFrom(
+            msg.sender,
+            address(this),
+            nftTotalPrice
+        );
+
+        uint256 finalBalance = currencyContract.balanceOf(address(this));
+        uint256 actualReceivedAmount = finalBalance - initialBalance;
+
+        // calculate sales share amount based on actual received amount
         (
             uint256 platformShareAmount,
             uint256 partnerShareAmount
-        ) = calculateSalesShareAmount(nftTotalPrice);
-
-        // increase nft sold quantity
-        nftSoldQuantity[nftId] += nftQuantity;
+        ) = calculateSalesShareAmount(actualReceivedAmount);
 
         emit BuyNft(
             msg.sender,
@@ -365,13 +377,6 @@ contract NFTSaleContract is
             nftId,
             nftQuantity,
             ""
-        );
-
-        // transfer currency token from user wallet to this contract
-        currencyContract.safeTransferFrom(
-            msg.sender,
-            address(this),
-            nftTotalPrice
         );
 
         // if soldout then remove nft price
@@ -434,10 +439,7 @@ contract NFTSaleContract is
         partnerSalesShareAmountTotal = 0;
 
         // transfer partner sales share amount from this contract to partner wallet
-        currencyContract.safeTransfer(
-            msg.sender,
-            partnerSalesShareAmount
-        );
+        currencyContract.safeTransfer(msg.sender, partnerSalesShareAmount);
     }
 
     function pause() external onlyRole(PAUSER_ROLE) {
