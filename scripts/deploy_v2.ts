@@ -1,7 +1,7 @@
 import hre, { ethers } from "hardhat";
 
 async function main() {
-  const NFTSaleContractFactory = await ethers.getContractFactory("NFTSaleContract");
+  const NFTSaleContractFactory = await ethers.getContractFactory("NFTSaleContractV2");
   const { ADMIN_ADDRESS, NFT_ADDRESS, CURRENCY_CONTRACT_ADDRESS } = process.env;
   // check if admin address is set
   if (!ADMIN_ADDRESS) throw new Error("ADMIN_ADDRESS is not set");
@@ -22,7 +22,7 @@ async function main() {
   // verify contract
   await hre.run("verify:verify", {
     address: nftSaleContract.address,
-    contract: "contracts/NFTSaleContract.sol:NFTSaleContract",
+    contract: "contracts/NFTSaleContractV2.sol:NFTSaleContractV2",
     constructorArguments: [ADMIN_ADDRESS, PLATFORM_SALES_SHARE_PERCENT, PARTNER_SALES_SHARE_PERCENT, NFT_ADDRESS, CURRENCY_CONTRACT_ADDRESS],
   });
 

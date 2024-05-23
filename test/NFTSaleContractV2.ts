@@ -12,7 +12,7 @@ describe("NFT Sale Contract", function () {
     const PARTNER_SALES_SHARE_PERCENT = 60 * 10 ** 8;
 
     // Contracts are deployed using the first signer/account by default
-    const [owner, admin, seller, buyer, platform, partner] = await ethers.getSigners();
+    const [owner, admin, seller, buyer, platform, partner, reseller] = await ethers.getSigners();
 
     const NFT = await ethers.getContractFactory("NFT");
     const nft = await NFT.deploy();
@@ -27,6 +27,7 @@ describe("NFT Sale Contract", function () {
     const NFT_SELLER_ROLE = await nftSaleContract.NFT_SELLER_ROLE();
     const PLATFORM_ROLE = await nftSaleContract.PLATFORM_ROLE();
     const PARTNER_ROLE = await nftSaleContract.PARTNER_ROLE();
+    const RESELLER_ROLE = await nftSaleContract.RESELLER_ROLE();
 
     // grant NFT_SELLER_ROLE from nft sale contract to seller
     await nftSaleContract.connect(admin).grantRole(NFT_SELLER_ROLE, seller.address);
@@ -37,8 +38,10 @@ describe("NFT Sale Contract", function () {
     // grant PARTNER_ROLE from nft sale contract to partner
     await nftSaleContract.connect(admin).grantRole(PARTNER_ROLE, partner.address);
 
+    // grant RESELLER_ROLE from nft sale contract to reseller
+    await nftSaleContract.connect(admin).grantRole(RESELLER_ROLE, reseller.address);
 
-    return { nft, currencyContract, nftSaleContract, owner, admin, seller, buyer, platform, partner, PLATFORM_SALES_SHARE_PERCENT, PARTNER_SALES_SHARE_PERCENT, DEFAULT_ADMIN_ROLE, NFT_SELLER_ROLE, PLATFORM_ROLE, PARTNER_ROLE };
+    return { nft, currencyContract, nftSaleContract, owner, admin, seller, buyer, platform, partner, reseller, PLATFORM_SALES_SHARE_PERCENT, PARTNER_SALES_SHARE_PERCENT, DEFAULT_ADMIN_ROLE, NFT_SELLER_ROLE, PLATFORM_ROLE, PARTNER_ROLE, RESELLER_ROLE };
   }
 
   describe("Deployment", function () {
@@ -202,6 +205,59 @@ describe("NFT Sale Contract", function () {
       // check partner currency balance
       expect(await currencyContract.balanceOf(partner.address)).to.eq(partnerShareAmount1.add(partnerShareAmount2));
 
+    });
+
+    it("Should complete flow by reseller", async function () {
+      const { nft, currencyContract, nftSaleContract, seller, buyer, platform, partner, reseller } = await loadFixture(deployFixture);
+
+      const nftId1 = 1;
+      const nftId2 = 2;
+      const quantity = 1;
+      const price1 = ethers.utils.parseEther("100");
+      const price2 = ethers.utils.parseEther("200");
+
+      await nft.mint(seller.address, nftId1, 1, "0x00");
+      await nft.mint(seller.address, nftId2, 1, "0x00");
+      await nft.connect(seller).setApprovalForAll(nftSaleContract.address, true);
+
+      // seller set nft to sale
+      await nftSaleContract.connect(seller).setNftToSale(nftId1, quantity, price1);
+      await nftSaleContract.connect(seller).setNftToSale(nftId2, quantity, price2);
+
+      // reseller buy nft to buyer
+      await currencyContract.mint(reseller.address, price1.add(price2));
+      await currencyContract.connect(reseller).approve(nftSaleContract.address, price1.add(price2));
+      const saleTx1 = await nftSaleContract.connect(reseller).buyNftByReseller(nftId1, quantity, buyer.address, "REFCODE");
+      const saleTx2 = await nftSaleContract.connect(reseller).buyNftByReseller(nftId2, quantity, buyer.address, "REFCODE");
+
+      const { platformShareAmount: platformShareAmount1, partnerShareAmount: partnerShareAmount1 } = await nftSaleContract.calculateSalesShareAmount(price1);
+      const { platformShareAmount: platformShareAmount2, partnerShareAmount: partnerShareAmount2 } = await nftSaleContract.calculateSalesShareAmount(price2);
+
+      const platformSalesShareAmountTotal = await nftSaleContract.platformSalesShareAmountTotal();
+      const partnerSalesShareAmountTotal = await nftSaleContract.partnerSalesShareAmountTotal();
+
+      // check event is emitted correctly
+      await expect(saleTx1).to.emit(nftSaleContract, "BuyNftByReseller").withArgs(reseller.address, nftId1, quantity, price1, price1, platformShareAmount1, partnerShareAmount1, buyer.address, "REFCODE");
+      await expect(saleTx2).to.emit(nftSaleContract, "BuyNftByReseller").withArgs(reseller.address, nftId2, quantity, price2, price2, platformShareAmount2, partnerShareAmount2, buyer.address, "REFCODE");
+
+      expect(await nft.balanceOf(buyer.address, nftId1)).to.eq(quantity);
+      expect(await nft.balanceOf(buyer.address, nftId2)).to.eq(quantity);
+      // check seller currency balance
+      expect(await currencyContract.balanceOf(seller.address)).to.eq(0);
+      // check platform sales share amount total
+      expect(platformSalesShareAmountTotal).to.eq(platformShareAmount1.add(platformShareAmount2));
+      // check partner sales
+      expect(partnerSalesShareAmountTotal).to.eq(partnerShareAmount1.add(partnerShareAmount2));
+
+      // platform withdraw sales share
+      await nftSaleContract.connect(platform).withdrawPlatformSalesShareAmount();
+      // check platform currency balance
+      expect(await currencyContract.balanceOf(platform.address)).to.eq(platformShareAmount1.add(platformShareAmount2));
+
+      // partner withdraw sales share
+      await nftSaleContract.connect(partner).withdrawPartnerSalesShareAmount();
+      // check partner currency balance
+      expect(await currencyContract.balanceOf(partner.address)).to.eq(partnerShareAmount1.add(partnerShareAmount2));
     });
 
     it("Should revert if nft is not approved for sale", async function () {
