@@ -33,16 +33,16 @@ contract NFTSaleContractV2 is
     uint256 public platformSalesSharePercent;
     uint256 public partnerSalesSharePercent;
 
-    uint256 public platformSalesShareAmountTotal;
-    uint256 public partnerSalesShareAmountTotal;
+    uint256 public platformSalesShareAmountTotal
+    uint256 public partnerSalesShareAmountTotal
 
     IERC1155 public nftContract;
     IERC20 public currencyContract;
 
     event SetSalesSharePercent(
-        uint256 platformSalesSharePercent,
+        uint256 platformSalesSharePercent
         uint256 partnerSalesSharePercent
-    );
+    )
 
     event SetNftToSale(uint256 nftId, uint256 nftQuantity, uint256 nftPrice);
     event RemoveNftFromSale(uint256 nftId, uint256 nftQuantity);
