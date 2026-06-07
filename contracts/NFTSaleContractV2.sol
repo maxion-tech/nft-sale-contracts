@@ -70,11 +70,11 @@ contract NFTSaleContractV2 is
     event WithdrawPlatformSalesShareAmount(
         address platformWallet,
         uint256 platformShareAmount
-    );
+    )
     event WithdrawPartnerSalesShareAmount(
         address partnerWallet,
         uint256 partnerShareAmount
-    );
+    )
 
     // map is store nft id and nft price
     mapping(uint256 => uint256) public nftPrice;
